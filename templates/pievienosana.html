@@ -16,70 +16,48 @@
 
         <label for="category">Категория:</label>
         <select name="category" id="category">
-            {% if vid == "income" %}
-              <option value="1">Darba samaksa</option>
-              <option value="2">Investīcijas, dividences</option>
-              <option value="3">Papildu ienākumi</option>
-              <option value="4">Sociālie izdevumi</option>
-              <option value="5">Nekustamā īpašuma nomas ienākumi</option>
-              <option value="6">Uzņēmējdarbības vai uzņēmējdarbības ienākumi</option>
-              <option value="7">Stipendijas vai granti</option>
-              <option value="8">Dāvanas un mantojumi</option>
-              <option value="9">Autortiesību honorāri</option>
-              <option value="10">Procenti no banku noguldījumiem</option>
-            {% elif vid == "expense" %}
-                <option value="11">Pārtikas izdevumi</option>
-                <option value="12">Dzīvesvieta </option>
-          <option value="13">Transporta izdevumi</option>
-          <option value="14">Veselība</option>
-          <option value="15">Izglītība </option>
-          <option value="16">Izklaides</option>
-          <option value="17">Apģērbs un apavi</option>
-          <option value="18">Iekārtošana un ietaisīšana</option>
-          <option value="19">Personīgie izdevumi (skaistumkopšana un citi)</option>
-          <option value="20">Citi izdevumi</option>
-            {% endif %}
+            <!-- В зависимости от выбранного вида, JS будет добавлять соответствующие категории -->
         </select><br><br>
-      <label for="name">Название:</label>
-      <input type="text" id="name" name="name" id="name"><br><br>
 
-      <label for="amount">Сумма:</label>
-      <input type="number" id="amount" name="amount" step="0.01"><br><br>
+        <label for="name">Название:</label>
+        <input type="text" id="name" name="name"><br><br>
 
-      <label for="date">Дата:</label>
-      <input type="date" id="date" name="date"><br><br>
+        <label for="amount">Сумма:</label>
+        <input type="number" id="amount" name="amount" step="0.01"><br><br>
 
-      <input type="submit" value="Pievienot">
+        <label for="date">Дата:</label>
+        <input type="date" id="date" name="date"><br><br>
+
+        <input type="submit" value="Pievienot">
     </form>
 
-  <script>
-      // Функция для обновления списка категорий
-      function updateCategories() {
-          var item_typeSelect = document.getElementById('item_type');
-          var categorySelect = document.getElementById('category');
-          var item_type = item_typeSelect.value;
-          // Очищаем список категорий
-          categorySelect.innerHTML = '';
-          // Добавляем новые категории в зависимости от выбранного типа
-          if (item_type === 'income') {
-            var categories = ['Darba samaksa', 'Investīcijas, dividences', 'Papildu ienākumi', 'Sociālie izdevumi', 'Nekustamā īpašuma nomas ienākumi', 'Uzņēmējdarbības vai uzņēmējdarbības ienākumi', 'Stipendijas vai granti', 'Dāvanas un mantojumi', 'Autortiesību honorāri', 'Procenti no banku noguldījumiem'];
-          } else if (item_type === 'expense') {
-            var categories = ['Pārtikas izdevumi', 'Dzīvesvieta', 'Transporta izdevumi', 'Veselība', 'Izglītība', 'Izklaides', 'Apģērbs un apavi', 'Iekārtošana un ietaisīšana', 'Personīgie izdevumi (skaistumkopšana un citi)', 'Citi izdevumi'];
-          }
-          categories.forEach(function(category) {
-              var option = document.createElement('option');
-              option.value = category;
-              option.textContent = category;
-              categorySelect.appendChild(option);
-          });
-      }
+    <script>
+        // Функция для обновления списка категорий
+        function updateCategories() {
+            var item_typeSelect = document.getElementById('item_type');
+            var categorySelect = document.getElementById('category');
+            var item_type = item_typeSelect.value;
+            // Очищаем список категорий
+            categorySelect.innerHTML = '';
+            // Добавляем новые категории в зависимости от выбранного типа
+            if (item_type === 'income') {
+                var categories = ['Darba samaksa', 'Investīcijas, dividences', 'Papildu ienākumi', 'Sociālie izdevumi', 'Nekustamā īpašuma nomas ienākumi', 'Uzņēmējdarbības vai uzņēmējdarbības ienākumi', 'Stipendijas vai granti', 'Dāvanas un mantojumi', 'Autortiesību honorāri', 'Procenti no banku noguldījumiem'];
+            } else if (item_type === 'expense') {
+                var categories = ['Pārtikas izdevumi', 'Dzīvesvieta', 'Transporta izdevumi', 'Veselība', 'Izglītība', 'Izklaides', 'Apģērbs un apavi', 'Iekārtošana un ietaisīšana', 'Personīgie izdevumi (skaistumkopšana un citi)', 'Citi izdevumi'];
+            }
+            categories.forEach(function(category) {
+                var option = document.createElement('option');
+                option.value = category;  // Значение категории - название самой категории
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        }
 
-      // Вызываем функцию при изменении выбранного типа
-      document.getElementById('item_type').addEventListener('change', updateCategories);
+        // Вызываем функцию при изменении выбранного типа
+        document.getElementById('item_type').addEventListener('change', updateCategories);
 
-      // Вызываем функцию в начале, чтобы заполнить список категорий при загрузке страницы
-      updateCategories();
-  </script>
-
+        // Вызываем функцию в начале, чтобы заполнить список категорий при загрузке страницы
+        updateCategories();
+    </script>
 </body>
 </html>
