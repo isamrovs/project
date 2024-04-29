@@ -1,1 +1,26 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: 'Anton', sans-serj;
+    color: white;
+    font-size: 16px;
+}
 
+h1, h2, h3, h4, h5,h6 {
+    padding: 0;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+ul, li {
+    display: block;
+}
+
+.container {
+    width: 1170px;
+    margin: 0 auto;
+}
+
+.header {
+    background: url('../img/header-bg.jpg') no-repeat center top / cover;
+}
