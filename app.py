@@ -4,13 +4,10 @@ from datetime import datetime, date, timedelta
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-
 from collections import defaultdict
 import os
 
-
 from calendar import monthrange
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parskats.db'
@@ -60,48 +57,81 @@ def pievienosana():
 def parskats():
     return render_template('parskats.html')
 
-@app.route('/get_financial_data')
+@app.route('/get_financial_data', methods=['POST', 'GET'])
 def get_financial_data():
-    # Вычисляем общую сумму расходов и доходов за все время
-    total_expenses = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'expense').scalar() or 0
-    total_income = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'income').scalar() or 0
+    if request.method == 'POST':
+        start_date = request.json['start_date']
+        end_date = request.json['end_date']
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-    # Вычисляем общий баланс (доходы - расходы за все время)
-    total_balance = total_income - total_expenses
+        # Данные за выбранный период
+        period_expenses = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'expense', Item.date.between(start_date, end_date)).scalar() or 0
+        period_income = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'income', Item.date.between(start_date, end_date)).scalar() or 0
 
-    # Строим категориальное распределение для расходов и доходов за текущий месяц
-    current_date = date.today()
-    first_day_of_month = current_date.replace(day=1)
-    _, last_day = monthrange(current_date.year, current_date.month)
-    last_day_of_month = current_date.replace(day=last_day)
-    total_expenses_month = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'expense', Item.date.between(first_day_of_month, last_day_of_month)).scalar() or 0
-    total_income_month = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'income', Item.date.between(first_day_of_month, last_day_of_month)).scalar() or 0
+        period_expenses_data = db.session.query(Item.category, db.func.sum(Item.amount)).filter(Item.item_type == 'expense', Item.date.between(start_date, end_date)).group_by(Item.category).all()
+        period_income_data = db.session.query(Item.category, db.func.sum(Item.amount)).filter(Item.item_type == 'income', Item.date.between(start_date, end_date)).group_by(Item.category).all()
 
-    # Формируем данные для диаграмм
-    expenses_data = db.session.query(Item.category, db.func.sum(Item.amount)).filter(Item.item_type == 'expense', Item.date.between(first_day_of_month, last_day_of_month)).group_by(Item.category).all()
-    income_data = db.session.query(Item.category, db.func.sum(Item.amount)).filter(Item.item_type == 'income', Item.date.between(first_day_of_month, last_day_of_month)).group_by(Item.category).all()
+        period_expenses_categories = [data[0] for data in period_expenses_data]
+        period_expenses_amounts = [data[1] for data in period_expenses_data]
+        period_income_categories = [data[0] for data in period_income_data]
+        period_income_amounts = [data[1] for data in period_income_data]
 
-    expenses_categories = [data[0] for data in expenses_data]
-    expenses_amounts = [data[1] for data in expenses_data]
-    income_categories = [data[0] for data in income_data]
-    income_amounts = [data[1] for data in income_data]
+        period_expenses_colors = ['#' + ("%06x" % random.randint(0, 0xFFFFFF)) for _ in range(len(period_expenses_categories))]
+        period_income_colors = ['#' + ("%06x" % random.randint(0, 0xFFFFFF)) for _ in range(len(period_income_categories))]
 
-    expenses_colors = ['#' + ("%06x" % random.randint(0, 0xFFFFFF)) for _ in range(len(expenses_categories))]
-    income_colors = ['#' + ("%06x" % random.randint(0, 0xFFFFFF)) for _ in range(len(income_categories))]
+        data = {
+            "total_expenses_selected": period_expenses,
+            "total_income_selected": period_income,
+            "expenses_categories_selected": period_expenses_categories,
+            "expenses_amounts_selected": period_expenses_amounts,
+            "expenses_colors_selected": period_expenses_colors,
+            "income_categories_selected": period_income_categories,
+            "income_amounts_selected": period_income_amounts,
+            "income_colors_selected": period_income_colors
+        }
 
-    data = {
-        "total_balance": total_balance,
-        "total_expenses": total_expenses_month,
-        "total_income": total_income_month,
-        "expenses_categories": expenses_categories,
-        "expenses_amounts": expenses_amounts,
-        "expenses_colors": expenses_colors,
-        "income_categories": income_categories,
-        "income_amounts": income_amounts,
-        "income_colors": income_colors
-    }
+        return jsonify(data)
+    else:
+        # Данные за текущий месяц
+        current_date = date.today()
+        first_day_of_month = current_date.replace(day=1)
+        _, last_day = monthrange(current_date.year, current_date.month)
+        last_day_of_month = current_date.replace(day=last_day)
 
-    return jsonify(data)
+        total_expenses_month = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'expense', Item.date.between(first_day_of_month, last_day_of_month)).scalar() or 0
+        total_income_month = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'income', Item.date.between(first_day_of_month, last_day_of_month)).scalar() or 0
+
+        expenses_data_month = db.session.query(Item.category, db.func.sum(Item.amount)).filter(Item.item_type == 'expense', Item.date.between(first_day_of_month, last_day_of_month)).group_by(Item.category).all()
+        income_data_month = db.session.query(Item.category, db.func.sum(Item.amount)).filter(Item.item_type == 'income', Item.date.between(first_day_of_month, last_day_of_month)).group_by(Item.category).all()
+
+        expenses_categories_month = [data[0] for data in expenses_data_month]
+        expenses_amounts_month = [data[1] for data in expenses_data_month]
+        income_categories_month = [data[0] for data in income_data_month]
+        income_amounts_month = [data[1] for data in income_data_month]
+
+        expenses_colors_month = ['#' + ("%06x" % random.randint(0, 0xFFFFFF)) for _ in range(len(expenses_categories_month))]
+        income_colors_month = ['#' + ("%06x" % random.randint(0, 0xFFFFFF)) for _ in range(len(income_categories_month))]
+
+        # Общие данные
+        total_expenses = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'expense').scalar() or 0
+        total_income = db.session.query(db.func.sum(Item.amount)).filter(Item.item_type == 'income').scalar() or 0
+        total_balance = total_income - total_expenses
+
+        # Данные для передачи в HTML
+        data = {
+            "total_balance": total_balance,
+            "total_expenses_month": total_expenses_month,
+            "total_income_month": total_income_month,
+            "expenses_categories_month": expenses_categories_month,
+            "expenses_amounts_month": expenses_amounts_month,
+            "expenses_colors_month": expenses_colors_month,
+            "income_categories_month": income_categories_month,
+            "income_amounts_month": income_amounts_month,
+            "income_colors_month": income_colors_month
+        }
+
+        return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True)
