@@ -1,24 +1,31 @@
 <!doctype html>
 <html>
 <head>
-	<title>Cashova</title>
-<script src="https://replit.com/public/js/repl-auth-v2.js"></script>
+    <meta charset="UTF-8">
+    <title>Cashova</title>
+    <script src="https://replit.com/public/js/repl-auth-v2.js"></script>
+    <link href="https://fonts.googleapis/com/">
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
   <body>
-      <header>
-          <h1>CASHOVA</h1>
-          <p>Mēs esam Cashova, un mūsu misija ir palīdzēt cilvēkiem efektīvi pārvaldīt savu finanšu stāvokli un sasniegt finansiālo stabilitāti. Mūsu kalkulators ir ērts un viegli izmantojams. Jūs varat ātri ievadīt savus izdevumus un ienākumus, lai redzētu savu kopējo finanšu stāvokli.</p>
-
-      </header>
-      <nav>
-          <ul>
+      <header id="header" class="header">
+          <div class="container">
+              <div class="nav">
+                  <img src="img/logo.svg" alt="Logotip">
+                            <ul>
+              <li><a href="">Home</a></li>
               <li><a href="pievienosana">Pievienošana</a></li>
               <li><a href="parskats">Pārskats</a></li>
           </ul>
+          <a href="tel:cashova"        
+              </div>
+          <h1>CASHOVA</h1>
+          </div>
+      </header>
+            <nav>
       </nav>
       <footer>
           <p>&copy; 2024 All rights reserved.</p>
       </footer>
   </body>
-</style>
 </html>
